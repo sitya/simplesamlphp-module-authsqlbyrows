@@ -1,6 +1,63 @@
 <?php
 
-class sspmod_sqlauth_Auth_Source_SQLbyRows extends sspmod_sqlauth_Auth_Source_SQL {
+class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPassBase {
+
+
+	private $dsn;
+
+	private $username;
+
+	private $password;
+
+	private $query;
+
+	public function __construct($info, $config) {
+		assert('is_array($info)');
+		assert('is_array($config)');
+		// Call the parent constructor first, as required by the interface
+		parent::__construct($info, $config);
+		// Make sure that all required parameters are present.
+		foreach (array('dsn', 'username', 'password', 'query') as $param) {
+			if (!array_key_exists($param, $config)) {
+				throw new Exception('Missing required attribute \'' . $param .
+					'\' for authentication source ' . $this->authId);
+			}
+			if (!is_string($config[$param])) {
+				throw new Exception('Expected parameter \'' . $param .
+					'\' for authentication source ' . $this->authId .
+					' to be a string. Instead it was: ' .
+					var_export($config[$param], TRUE));
+			}
+		}
+		$this->dsn = $config['dsn'];
+		$this->username = $config['username'];
+		$this->password = $config['password'];
+		$this->query = $config['query'];
+	}
+
+	private function connect() {
+		try {
+			$db = new PDO($this->dsn, $this->username, $this->password);
+		} catch (PDOException $e) {
+			throw new Exception('sqlauth:' . $this->authId . ': - Failed to connect to \'' .
+				$this->dsn . '\': '. $e->getMessage());
+		}
+		$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+		$driver = explode(':', $this->dsn, 2);
+		$driver = strtolower($driver[0]);
+		/* Driver specific initialization. */
+		switch ($driver) {
+		case 'mysql':
+			/* Use UTF-8. */
+			$db->exec("SET NAMES 'utf8'");
+			break;
+		case 'pgsql':
+			/* Use UTF-8. */
+			$db->exec("SET NAMES 'UTF8'");
+			break;
+		}
+		return $db;
+	}
 
 	protected function login($username, $password) {
 		assert('is_string($username)');
