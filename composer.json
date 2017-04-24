@@ -1,0 +1,16 @@
+{
+    "name": "sitya/simplesamlphp-module-authsqlbyrows",
+    "description": "A SimpleSAMLphp SQL authentication module to collect attributes from multiple rows",
+    "type": "simplesamlphp-module",
+    "keywords": [ "saml2", "SimpleSAMLphp", "saml", "sqlauth" ],
+    "license": "LGPL-2.1",
+    "authors": [
+        {
+            "name": "Tamas Frank",
+            "email": "frank.tamas@wigner.mta.hu"
+        }
+    ],
+    "require": {
+        "simplesamlphp/composer-module-installer": "~1.0"
+    }
+}
