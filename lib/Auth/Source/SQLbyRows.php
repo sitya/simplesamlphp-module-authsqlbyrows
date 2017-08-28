@@ -11,13 +11,15 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
 
 	private $query;
 
+	private $password_hashing; # default: cleartext
+
 	public function __construct($info, $config) {
 		assert('is_array($info)');
 		assert('is_array($config)');
 		// Call the parent constructor first, as required by the interface
 		parent::__construct($info, $config);
 		// Make sure that all required parameters are present.
-		foreach (array('dsn', 'username', 'password', 'query') as $param) {
+		foreach (array('dsn', 'username', 'password', 'query', 'password_hashing') as $param) {
 			if (!array_key_exists($param, $config)) {
 				throw new Exception('Missing required attribute \'' . $param .
 					'\' for authentication source ' . $this->authId);
@@ -33,6 +35,7 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
 		$this->username = $config['username'];
 		$this->password = $config['password'];
 		$this->query = $config['query'];
+		$this->password_hashing = $config['password_hashing'];
 	}
 
 	private function connect() {
@@ -73,6 +76,9 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
 		}
 
 		try {
+			if ($this->password_hashing != 'cleartext') {
+				$password = hash($this->password_hashing, $password);
+			}
 			$res = $sth->execute(array('username' => $username, 'password' => $password));
 		} catch (PDOException $e) {
 			throw new Exception('sqlauth:' . $this->authId .
