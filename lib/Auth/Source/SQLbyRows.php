@@ -103,28 +103,32 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
 		}
 
 		$attributes = array();
-		foreach ($data as $row) {
+        foreach ($data as $row) {
 
-			$name = $row['_key'];
-			$value  = $row['_value'];
+                $name = $row['_key'];
+                $value  = $row['_value'];
 
-			if ($value === null || $name == null) {
-				continue;
-			}			
+                if ($value === null || $name == null) {
+                        continue;
+                }
 
-			if (!array_key_exists($name, $attributes)) {
-				$attributes[$name] = array();
-			}
+                if (!array_key_exists($name, $attributes)) {
+                        $attributes[$name] = array();
+                }
 
-			$value = (string)$value;
+                $subvalues = explode(';',$value);
+                foreach ($subvalues as $subvalue){
 
-			if (in_array($value, $attributes[$name], true)) {
-				/* Value already exists in attribute. */
-				continue;
-			}
+                        $subvalue = (string)$subvalue;
 
-			$attributes[$name][] = $value;
-		}
+                        if (in_array($subvalue, $attributes[$name], true)) {
+                                /* Value already exists in attribute. */
+                                continue;
+                        }
+
+                        $attributes[$name][] = trim($subvalue);
+                }
+        }
 
 		SimpleSAML_Logger::info('sqlauth:' . $this->authId . ': Attributes: ' .
 			implode(',', array_keys($attributes)));
