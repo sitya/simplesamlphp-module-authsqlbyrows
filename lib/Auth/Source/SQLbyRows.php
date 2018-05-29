@@ -98,7 +98,7 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
 		if (count($data) === 0) {
 			/* No rows returned - invalid username/password. */
 			SimpleSAML_Logger::error('sqlauth:' . $this->authId .
-				': No rows in result set. Probably wrong username/password.');
+				': No rows in result set. Probably wrong username/password. Username: ' . $username);
 			throw new SimpleSAML_Error_Error('WRONGUSERPASS');
 		}
 
@@ -116,14 +116,18 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
 				$attributes[$name] = array();
 			}
 
-			$value = (string)$value;
+			$subvalues = explode(';',$value);
+			foreach ($subvalues as $subvalue){
+			
+				$subvalue = (string)$subvalue;
 
-			if (in_array($value, $attributes[$name], true)) {
-				/* Value already exists in attribute. */
-				continue;
+				if (in_array($subvalue, $attributes[$name], true)) {
+					/* Value already exists in attribute. */
+					continue;
+				}
+
+				$attributes[$name][] = trim($subvalue);
 			}
-
-			$attributes[$name][] = $value;
 		}
 
 		SimpleSAML_Logger::info('sqlauth:' . $this->authId . ': Attributes: ' .
