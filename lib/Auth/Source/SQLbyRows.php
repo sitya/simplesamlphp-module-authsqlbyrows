@@ -1,6 +1,8 @@
 <?php
 
-class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPassBase
+namespace SimpleSAML\Module\authsqlbyrows\Auth\Source;
+
+class SQLbyRows extends \SimpleSAML\Module\core\Auth\UserPassBase
 {
     private $dsn;
 
@@ -41,12 +43,12 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
     private function connect()
     {
         try {
-            $db = new PDO($this->dsn, $this->username, $this->password);
-        } catch (PDOException $e) {
-            throw new Exception('sqlauth:' . $this->authId . ': - Failed to connect to \'' .
+            $db = new \PDO($this->dsn, $this->username, $this->password);
+        } catch (\PDOException $e) {
+            throw new \Exception('sqlauth:' . $this->authId . ': - Failed to connect to \'' .
                 $this->dsn . '\': '. $e->getMessage());
         }
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $db->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $driver = explode(':', $this->dsn, 2);
         $driver = strtolower($driver[0]);
         /* Driver specific initialization. */
@@ -72,8 +74,8 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
 
         try {
             $sth = $db->prepare($this->query);
-        } catch (PDOException $e) {
-            throw new Exception('sqlauth:' . $this->authId .
+        } catch (\PDOException $e) {
+            throw new \Exception('sqlauth:' . $this->authId .
                 ': - Failed to prepare query: ' . $e->getMessage());
         }
 
@@ -82,26 +84,26 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
                 $password = hash($this->password_hashing, $password);
             }
             $res = $sth->execute(array('username' => $username, 'password' => $password));
-        } catch (PDOException $e) {
-            throw new Exception('sqlauth:' . $this->authId .
+        } catch (\PDOException $e) {
+            throw new \Exception('sqlauth:' . $this->authId .
                 ': - Failed to execute query: ' . $e->getMessage());
         }
 
         try {
-            $data = $sth->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            throw new Exception('sqlauth:' . $this->authId .
+            $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            throw new \Exception('sqlauth:' . $this->authId .
                 ': - Failed to fetch result set: ' . $e->getMessage());
         }
 
-        SimpleSAML\Logger::info('sqlauth:' . $this->authId . ': Got ' . count($data) .
+        \SimpleSAML\Logger::info('sqlauth:' . $this->authId . ': Got ' . count($data) .
             ' rows from database');
 
         if (count($data) === 0) {
             /* No rows returned - invalid username/password. */
-            SimpleSAML\Logger::error('sqlauth:' . $this->authId .
+            \SimpleSAML\Logger::error('sqlauth:' . $this->authId .
                 ': No rows in result set. Probably wrong username/password. Username: ' . $username);
-            throw new SimpleSAML_Error_Error('WRONGUSERPASS');
+            throw new \SimpleSAML\Error\Error('WRONGUSERPASS');
         }
 
         $attributes = array();
@@ -130,7 +132,7 @@ class sspmod_authsqlbyrows_Auth_Source_SQLbyRows extends sspmod_core_Auth_UserPa
             }
         }
 
-        SimpleSAML\Logger::info('sqlauth:' . $this->authId . ': Attributes: ' .
+        \SimpleSAML\Logger::info('sqlauth:' . $this->authId . ': Attributes: ' .
             implode(',', array_keys($attributes)));
 
         return $attributes;
